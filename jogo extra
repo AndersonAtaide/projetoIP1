@@ -296,7 +296,7 @@ int main(int argc, char* args[])
 				{
 					if (projetilVida)
 					{
-						projetilRect.x = SCREEN_WIDTH / 2 - 5;
+						projetilRect.x = detetiveRect.x;
 						projetilRect.y = SCREEN_HEIGHT - 50;
 						projetilRect.w = 10;
 						projetilRect.h = 20;
@@ -403,7 +403,7 @@ int main(int argc, char* args[])
 			}
 			else if (projetilRect.y <= 0)
 			{
-				projetilRect.y = 0;
+				projetilRect.y = SCREEN_HEIGHT - 50;
 				projetilVida = false;
 				atirar = false;
 			}
@@ -461,6 +461,7 @@ int main(int argc, char* args[])
 
 		if (colPorjIni)
 		{
+			projetilRect.y = SCREEN_HEIGHT - 50;
 			vidaAssassino--;
 			if (vidaAssassino <= 0)
 			{
@@ -576,6 +577,11 @@ int main(int argc, char* args[])
 			{
 				SDL_RenderCopy(gRenderer, projetil, NULL, &projetilRect);
 			}
+		}
+		else if (atirar == false)
+		{
+			SDL_RenderClear(&projetil);
+			projetilVida == true;
 		}
 			
 
