@@ -1,0 +1,498 @@
+//Using SDL and standard IO
+#include <SDL.h>
+#include <SDL_image.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+#include <time.h>
+
+#define velAsssassino 75 //delay para retardar o movimento do assassino
+#define quantBlocos 20 //quantidade de blocos a serem criados
+
+//dimenssões da janela principal
+const int SCREEN_WIDTH = 960;
+const int SCREEN_HEIGHT = 720;
+
+
+//criação das variaveis de imagens e janelas
+SDL_Window* janela = NULL;
+SDL_Surface* superficiePrincipal = NULL;
+SDL_Surface* background = NULL;
+SDL_Renderer* gRenderer = NULL;
+SDL_Texture* gTexture = NULL;
+SDL_Texture* detetive1 = NULL;
+SDL_Texture* detetive2 = NULL;
+SDL_Texture* detetive3 = NULL;
+SDL_Texture* detetive4 = NULL;
+SDL_Texture* detetive5 = NULL;
+SDL_Texture* detetive6 = NULL;
+SDL_Texture* detetive7 = NULL;
+
+//-----------------------------------INICIO DAS FUNÇÕES-------------------------------------------------//
+//-----------------------------------------------------------------------------------------------------//
+
+//inicializa tudo
+bool init();
+
+//fecha tudo
+void fechar();
+
+//insere imagem na tela.
+bool loadImage();
+
+//carrega textura individual
+SDL_Texture* loadTexture(const char* imagens, SDL_Renderer* window_renderer);
+
+
+bool init()
+{
+	//inicializando flag
+	bool sucesso = true;
+
+	//inicializa o uso do SDL
+	SDL_Init(SDL_INIT_EVERYTHING);
+
+	//inicializa o uso de arquivos PNG
+	SDL_Init(IMG_INIT_PNG);
+
+	//cria a janela
+	janela = SDL_CreateWindow("casa 4", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+
+	superficiePrincipal = SDL_GetWindowSurface(janela);
+
+	//cria a renderização para a tela principal
+	gRenderer = SDL_CreateRenderer(janela, -1, SDL_RENDERER_ACCELERATED);
+
+	//inicializa a cor de renderização
+	SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
+
+	return sucesso;
+}
+
+void fechar()
+{
+	//libera a superficie
+	SDL_DestroyTexture(gTexture);
+	SDL_DestroyTexture(detetive1);
+	gTexture = NULL;
+
+	//destroi a janela
+	SDL_DestroyRenderer(gRenderer);
+	SDL_DestroyWindow(janela);
+	janela = NULL;
+	gRenderer = NULL;
+
+	//encerra o uso do tipo PNG
+	IMG_Quit();
+
+	//encerra o SDL
+	SDL_Quit();
+}
+
+bool loadImage()
+{
+	bool sucesso = true;
+
+	//adiciona a imagem a superficie inteira
+	gTexture = loadTexture("imagens/pokemon room.png", gRenderer);
+	detetive1 = loadTexture("imagens/detetive1.png", gRenderer);
+	detetive2 = loadTexture("imagens/detetive2.png", gRenderer);
+	detetive3 = loadTexture("imagens/detetive3.png", gRenderer);
+	detetive4 = loadTexture("imagens/detetive4.png", gRenderer);
+	detetive5 = loadTexture("imagens/detetive5.png", gRenderer);
+	detetive6 = loadTexture("imagens/detetive6.png", gRenderer);
+	detetive7 = loadTexture("imagens/detetive7.png", gRenderer);
+
+	if (gTexture == NULL)
+	{
+		printf("imagem não localizada %s! SDL Error: %s\n", "imagens/background.png", SDL_GetError());
+		sucesso = false;
+	}
+
+	return sucesso;
+}
+
+SDL_Texture* loadTexture(const char* imagens, SDL_Renderer* gRenderer)
+{
+	//imagem final otimizada
+	SDL_Texture* newTexture = NULL;
+
+	//da load de uma imagem
+	SDL_Surface* loadedSurface = IMG_Load(imagens);
+	if (loadedSurface == NULL)
+	{
+		printf("Unable to load image %s! SDL_image Error: %s\n", imagens, IMG_GetError());
+	}
+
+	//converte a imagem para o tamanho da screen
+	newTexture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
+	if (newTexture == NULL)
+	{
+		printf("Unable to create texture from % s!SDL Error : % s\n", imagens, SDL_GetError() );
+	}
+
+	SDL_FreeSurface(loadedSurface);
+
+	return newTexture;
+}
+
+
+
+//-----------------------------------FIM DAS FUNÇÕES---------------------------------------------------//
+//-----------------------------------------------------------------------------------------------------//
+
+
+int main(int argc, char* args[])
+{
+	int cenario[22][31] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+						   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+						   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+						   0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,
+						   0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,
+						   0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+						   1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+						   1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+						   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+						   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1, 
+						   1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
+						   1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1, 
+						   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
+						   0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,
+						   0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,
+						   0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,
+						   0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,
+						   0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,
+	                       0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
+						   0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1, 
+						   0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1, 
+						   0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1};
+
+	for (int i = 0; i < 22; i++) {
+		for (int j = 0; j < 30; j++) {
+			printf("%i", cenario[i][j]);
+		}
+		printf("\n");
+	}
+	
+	printf("\n");
+
+	int detetiveLinha1 = 3, detetiveColuna1 = 2, 
+		detetiveLinha2 = 3, detetiveColuna2 = 3,
+		detetiveLinha3 = 4, detetiveColuna3 = 2,
+		detetiveLinha4 = 4, detetiveColuna4 = 3;
+
+	cenario[detetiveLinha1][detetiveColuna1] = 2;
+	cenario[detetiveLinha2][detetiveColuna2] = 2;
+	cenario[detetiveLinha3][detetiveColuna3] = 2;
+	cenario[detetiveLinha4][detetiveColuna4] = 2;
+
+	for (int i = 0; i < 22; i++) {
+		for (int j = 0; j < 30; j++) {
+			printf("%i", cenario[i][j]);
+		}
+		printf("\n");
+	}
+
+	int sobe = 0, desce = 0, esquerda = 0, direita = 0;
+
+	//booleanas de movimento
+	bool esq = false;
+	bool dir = false;
+	bool cima = false;
+	bool baixo = false;
+	
+	//contadores de frames
+	int frameAtual = 0;
+	int frameDetetive = 0;
+	int qtdFrame = 3;
+	
+	//randoniza a posição X do assassino
+	srand(time(NULL));
+
+	//função booleana de execução do loop e criação da variavel atribuida a eventos
+	bool executando = true;
+	SDL_Event click;
+	
+
+	//--Area de criação de retangulos :D --//
+	
+	SDL_Rect detetiveRect;
+	detetiveRect.x = 64;
+	detetiveRect.y = 96;
+	detetiveRect.w = 64;
+	detetiveRect.h = 64;
+
+
+	//--fim da área de criação de retângulos--//
+
+	
+	init();
+
+	loadImage();
+
+	//loop principal do jogo
+	while (executando)
+	{
+
+		//eventos de comando do teclado/mouse
+		while (SDL_PollEvent(&click))
+		{
+			//fechando a janela com ESC ou clique no X
+			if (click.type == SDL_QUIT)
+			{
+				executando = false;
+			}
+
+			switch (click.key.keysym.sym)
+			{
+			case SDLK_ESCAPE:
+				executando = false;
+			}
+
+			if (click.type == SDL_KEYDOWN)
+			{
+				if (click.key.keysym.sym == SDLK_a)
+				{
+					esq = true;
+				}
+				else if (click.key.keysym.sym == SDLK_d)
+				{
+					dir = true;
+				}
+				else if (click.key.keysym.sym == SDLK_w)
+				{
+					cima = true;
+				}
+				else if (click.key.keysym.sym == SDLK_s)
+				{
+					baixo = true;
+				}
+				else if (click.key.keysym.sym == SDLK_k)
+				{
+
+				}
+			}
+			else if (click.type == SDL_KEYUP)
+				if (click.key.keysym.sym == SDLK_a)
+				{
+					esq = false;
+				}
+				else if (click.key.keysym.sym == SDLK_d)
+				{
+					dir = false;
+				}
+				else if (click.key.keysym.sym == SDLK_w)
+				{
+					cima = false;
+				}
+				else if (click.key.keysym.sym == SDLK_s)
+				{
+					baixo = false;
+				}
+		}
+
+		//---------------lógica----------------------//
+		//------------------------------------------//
+
+		//---DETETIVE---//
+
+		//movimento do detetive
+		if (esq == true)
+		{
+			if (cenario[detetiveLinha1][detetiveColuna1 - 1] == 0 && cenario[detetiveLinha3][detetiveColuna3 - 1] == 0)
+			{
+				detetiveRect.x -= 8;
+				esquerda++;
+				if (esquerda % 4 == 0)
+				{
+					cenario[detetiveLinha1][detetiveColuna1 + 1] = 0;
+					cenario[detetiveLinha3][detetiveColuna3 + 1] = 0;
+					detetiveColuna1--;
+					detetiveColuna2--;
+					detetiveColuna3--;
+					detetiveColuna4--;
+					cenario[detetiveLinha1][detetiveColuna1] = 2;
+					cenario[detetiveLinha2][detetiveColuna2] = 2;
+					cenario[detetiveLinha3][detetiveColuna3] = 2;
+					cenario[detetiveLinha4][detetiveColuna4] = 2;
+				}
+			}
+			for (int i = 0; i < 22; i++) {
+				for (int j = 0; j < 30; j++) {
+					printf("%i", cenario[i][j]);
+				}
+				printf("\n");
+			}
+			printf("\n");
+		}
+		else if (dir == true)
+		{
+			if (cenario[detetiveLinha2][detetiveColuna2 + 1] == 0 && cenario[detetiveLinha4][detetiveColuna4 + 1] == 0)
+			{
+				detetiveRect.x += 8;
+				direita++;
+				if (direita % 4 == 0)
+				{
+					cenario[detetiveLinha2][detetiveColuna2 - 1] = 0;
+					cenario[detetiveLinha4][detetiveColuna2 - 1] = 0;
+					detetiveColuna1++;
+					detetiveColuna2++;
+					detetiveColuna3++;
+					detetiveColuna4++;
+					cenario[detetiveLinha1][detetiveColuna1] = 2;
+					cenario[detetiveLinha2][detetiveColuna2] = 2;
+					cenario[detetiveLinha3][detetiveColuna3] = 2;
+					cenario[detetiveLinha4][detetiveColuna4] = 2;
+				}
+			}
+			for (int i = 0; i < 22; i++) {
+				for (int j = 0; j < 30; j++) {
+					printf("%i", cenario[i][j]);
+				}
+				printf("\n");
+			}
+			printf("\n");
+		}
+		else if (cima == true)
+		{
+			if (cenario[detetiveLinha1 - 1][detetiveColuna1] == 0 && cenario[detetiveLinha2 - 1][detetiveColuna2] == 0)
+			{
+				detetiveRect.y -= 8;
+				sobe++;
+				if (sobe % 4 == 0)
+				{
+					cenario[detetiveLinha1 + 1][detetiveColuna1] = 0;
+					cenario[detetiveLinha2 + 1][detetiveColuna2] = 0;
+					detetiveLinha1--;
+					detetiveLinha2--;
+					detetiveLinha3--;
+					detetiveLinha4--;
+					cenario[detetiveLinha1][detetiveColuna1] = 2;
+					cenario[detetiveLinha2][detetiveColuna2] = 2;
+					cenario[detetiveLinha3][detetiveColuna3] = 2;
+					cenario[detetiveLinha4][detetiveColuna4] = 2;
+				}
+			}
+			for (int i = 0; i < 22; i++) {
+				for (int j = 0; j < 30; j++) {
+					printf("%i", cenario[i][j]);
+				}
+				printf("\n");
+			}
+
+			printf("\n");
+		}
+		else if (baixo == true)
+		{
+			if (cenario[detetiveLinha3 + 1][detetiveColuna3] == 0 && cenario[detetiveLinha4 + 1][detetiveColuna4] == 0)
+			{
+				detetiveRect.y += 8;
+				desce++;
+				if (desce % 4 == 0)
+				{
+					cenario[detetiveLinha3 - 1][detetiveColuna3] = 0;
+					cenario[detetiveLinha4 - 1][detetiveColuna4] = 0;
+					detetiveLinha1++;
+					detetiveLinha2++;
+					detetiveLinha3++;
+					detetiveLinha4++;
+					cenario[detetiveLinha1][detetiveColuna1] = 2;
+					cenario[detetiveLinha2][detetiveColuna2] = 2;
+					cenario[detetiveLinha3][detetiveColuna3] = 2;
+					cenario[detetiveLinha4][detetiveColuna4] = 2;
+				}
+			}
+			for (int i = 0; i < 22; i++) {
+				for (int j = 0; j < 30; j++) {
+					printf("%i", cenario[i][j]);
+				}
+				printf("\n");
+			}
+
+			printf("\n");
+		}
+
+		
+		
+
+		//colisão do detetive com a tela
+		if (detetiveRect.x < 0)
+		{
+			detetiveRect.x = 0;
+		}
+		else if (detetiveRect.x > SCREEN_WIDTH - detetiveRect.w)
+		{
+			detetiveRect.x = SCREEN_WIDTH - detetiveRect.w;
+		}
+		if (detetiveRect.y < 0)
+		{
+			detetiveRect.y = 0;
+		}
+		else if (detetiveRect.y > SCREEN_HEIGHT - detetiveRect.h)
+		{
+			detetiveRect.y = SCREEN_HEIGHT - detetiveRect.h;
+		}
+
+
+		//--COLISÕES--//
+		
+		//--------renderização---------//
+		//----------------------------//
+
+		//limpa a renderização
+		SDL_RenderClear(gRenderer);
+
+		//renderiza a textura na tela
+		SDL_RenderCopy(gRenderer, gTexture, NULL, NULL);
+
+		if (esq)
+		{
+			switch (frameDetetive)
+			{
+				case 0:
+					SDL_RenderCopy(gRenderer, detetive2, NULL, &detetiveRect);
+					break;
+				case 1:
+					SDL_RenderCopy(gRenderer, detetive3, NULL, &detetiveRect);
+					break;
+				case 2:
+					SDL_RenderCopy(gRenderer, detetive4, NULL, &detetiveRect);
+					break;
+			}
+		}
+		else if (dir)
+		{
+			switch (frameDetetive)
+			{
+			case 0:
+				SDL_RenderCopy(gRenderer, detetive5, NULL, &detetiveRect);
+				break;
+			case 1:
+				SDL_RenderCopy(gRenderer, detetive6, NULL, &detetiveRect);
+				break;
+			case 2:
+				SDL_RenderCopy(gRenderer, detetive7, NULL, &detetiveRect);
+				break;
+			}
+		}
+		else
+		{
+			SDL_RenderCopy(gRenderer, detetive1, NULL, &detetiveRect);
+		}
+		
+		//atualiza a renderização
+		SDL_RenderPresent(gRenderer);
+
+		frameDetetive++;
+		if (frameDetetive == 3)
+			frameDetetive = 0;
+
+
+		SDL_Delay(50);
+	}
+
+	fechar();
+
+	return 0;
+}
