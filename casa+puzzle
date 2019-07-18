@@ -6,14 +6,14 @@
 #include <stdbool.h>
 #include <string.h>
 #include <time.h>
+#include <SDL_ttf.h>
 
 #define velAsssassino 75 //delay para retardar o movimento do assassino
 #define quantBlocos 20 //quantidade de blocos a serem criados
 
 //dimenssões da janela principal
-const int SCREEN_WIDTH = 960;
+const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
-
 
 //criação das variaveis de imagens e janelas
 SDL_Window* janela = NULL;
@@ -21,14 +21,32 @@ SDL_Surface* superficiePrincipal = NULL;
 SDL_Surface* background = NULL;
 SDL_Renderer* gRenderer = NULL;
 SDL_Texture* gTexture = NULL;
-SDL_Texture* detetive1 = NULL;
 SDL_Texture* detetive2 = NULL;
 SDL_Texture* detetive3 = NULL;
 SDL_Texture* detetive4 = NULL;
 SDL_Texture* detetive5 = NULL;
 SDL_Texture* detetive6 = NULL;
 SDL_Texture* detetive7 = NULL;
+SDL_Texture* detetive8 = NULL;
+SDL_Texture* detetive9 = NULL;
+SDL_Texture* detetive10 = NULL;
+SDL_Texture* detetive11 = NULL;
+SDL_Texture* detetive12 = NULL;
+SDL_Texture* detetive13 = NULL;
 SDL_Texture* texto = NULL;
+SDL_Texture* pista1 = NULL;
+SDL_Texture* pista2 = NULL;
+SDL_Texture* pista3 = NULL;
+SDL_Texture* pista4 = NULL;
+SDL_Texture* caixa = NULL;
+SDL_Texture* carta = NULL;
+SDL_Texture* bauAberto = NULL;
+SDL_Texture* miniChave1 = NULL;
+SDL_Texture* miniChave2 = NULL;
+SDL_Texture* miniChave3 = NULL;
+SDL_Texture* miniChave4 = NULL;
+SDL_Texture* miniBau = NULL;
+
 
 //-----------------------------------INICIO DAS FUNÇÕES-------------------------------------------------//
 //-----------------------------------------------------------------------------------------------------//
@@ -54,6 +72,9 @@ bool init()
 	//inicializa o uso do SDL
 	SDL_Init(SDL_INIT_EVERYTHING);
 
+	//inicia o uso de texto
+	TTF_Init();
+
 	//inicializa o uso de arquivos PNG
 	SDL_Init(IMG_INIT_PNG);
 
@@ -75,7 +96,7 @@ void fechar()
 {
 	//libera a superficie
 	SDL_DestroyTexture(gTexture);
-	SDL_DestroyTexture(detetive1);
+	SDL_DestroyTexture(detetive2);
 	gTexture = NULL;
 
 	//destroi a janela
@@ -87,6 +108,9 @@ void fechar()
 	//encerra o uso do tipo PNG
 	IMG_Quit();
 
+	//encerra o uso de texto
+	TTF_Quit();
+
 	//encerra o SDL
 	SDL_Quit();
 }
@@ -97,21 +121,37 @@ bool loadImage()
 
 	//adiciona a imagem a superficie inteira
 	gTexture = loadTexture("imagens/pokemon room.png", gRenderer);
-	detetive1 = loadTexture("imagens/detetive1.png", gRenderer);
+	//adiciona imagens individuais
 	detetive2 = loadTexture("imagens/detetive2.png", gRenderer);
 	detetive3 = loadTexture("imagens/detetive3.png", gRenderer);
 	detetive4 = loadTexture("imagens/detetive4.png", gRenderer);
 	detetive5 = loadTexture("imagens/detetive5.png", gRenderer);
 	detetive6 = loadTexture("imagens/detetive6.png", gRenderer);
 	detetive7 = loadTexture("imagens/detetive7.png", gRenderer);
-	texto = loadTexture("imagens/barradelife1.png", gRenderer);
+	detetive8 = loadTexture("imagens/detetive8.png", gRenderer);
+	detetive9 = loadTexture("imagens/detetive9.png", gRenderer);
+	detetive10 = loadTexture("imagens/detetive10.png", gRenderer);
+	detetive11 = loadTexture("imagens/detetive11.png", gRenderer);
+	detetive12 = loadTexture("imagens/detetive12.png", gRenderer);
+	detetive13 = loadTexture("imagens/detetive13.png", gRenderer);
+	pista1 = loadTexture("imagens/chatbox1.png", gRenderer);
+	pista2 = loadTexture("imagens/chatbox2.png", gRenderer);
+	pista3 = loadTexture("imagens/chatbox3.png", gRenderer);
+	pista4 = loadTexture("imagens/chatbox4.png", gRenderer);
+	caixa = loadTexture("imagens/chatboxbau.png", gRenderer);
+	carta = loadTexture("imagens/chatboxcarta.png", gRenderer);
+	bauAberto = loadTexture("imagens/chatboxbauaberto.png", gRenderer);
+	miniChave1 = loadTexture("imagens/detetive11.png", gRenderer);
+	miniChave2 = loadTexture("imagens/detetive3.png", gRenderer);
+	miniChave3 = loadTexture("imagens/detetive5.png", gRenderer);
+	miniChave4 = loadTexture("imagens/detetive7.png", gRenderer);
+	miniBau = loadTexture("imagens/detetive9.png", gRenderer);
 
 	if (gTexture == NULL)
 	{
 		printf("imagem não localizada %s! SDL Error: %s\n", "imagens/background.png", SDL_GetError());
 		sucesso = false;
 	}
-
 	return sucesso;
 }
 
@@ -131,7 +171,7 @@ SDL_Texture* loadTexture(const char* imagens, SDL_Renderer* gRenderer)
 	newTexture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
 	if (newTexture == NULL)
 	{
-		printf("Unable to create texture from % s!SDL Error : % s\n", imagens, SDL_GetError() );
+		printf("Unable to create texture from % s!SDL Error : % s\n", imagens, SDL_GetError());
 	}
 
 	SDL_FreeSurface(loadedSurface);
@@ -140,46 +180,45 @@ SDL_Texture* loadTexture(const char* imagens, SDL_Renderer* gRenderer)
 }
 
 
-
 //-----------------------------------FIM DAS FUNÇÕES---------------------------------------------------//
 //-----------------------------------------------------------------------------------------------------//
 
 
 int main(int argc, char* args[])
 {
-	int cenario[22][31] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-						   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-						   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-						   0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,
-						   0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,
-						   0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-						   1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-						   1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-						   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-						   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1, 
-						   1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
-						   1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1, 
-						   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
-						   0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,
-						   0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,
-						   0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,
-						   0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,
-						   0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,
-	                       0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
-						   0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1, 
-						   0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1, 
-						   0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1};
+
+	int cenario[22][34] = { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+						   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+						   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+						   0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,
+						   0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,
+						   0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+						   1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+						   1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+						   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+						   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+						   1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
+						   1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
+						   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
+						   0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+						   0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+						   0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+						   0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
+						   0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
+						   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
+						   0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
+						   0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
+						   0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1 };
 
 	for (int i = 0; i < 22; i++) {
-		for (int j = 0; j < 30; j++) {
+		for (int j = 0; j < 34; j++) {
 			printf("%i", cenario[i][j]);
 		}
 		printf("\n");
 	}
-	
 	printf("\n");
 
-	int detetiveLinha1 = 3, detetiveColuna1 = 2, 
+	int detetiveLinha1 = 3, detetiveColuna1 = 2,
 		detetiveLinha2 = 3, detetiveColuna2 = 3,
 		detetiveLinha3 = 4, detetiveColuna3 = 2,
 		detetiveLinha4 = 4, detetiveColuna4 = 3;
@@ -190,7 +229,7 @@ int main(int argc, char* args[])
 	cenario[detetiveLinha4][detetiveColuna4] = 2;
 
 	for (int i = 0; i < 22; i++) {
-		for (int j = 0; j < 30; j++) {
+		for (int j = 0; j < 34; j++) {
 			printf("%i", cenario[i][j]);
 		}
 		printf("\n");
@@ -200,6 +239,8 @@ int main(int argc, char* args[])
 	int bau = 0;
 	int chave1 = 0, chave2 = 0, chave3 = 0, chave4 = 0;
 	int cartaDeAmor = 0;
+	int detetiveLado = 4;
+	bool cartaLida = false;
 	bool chatBox = false;
 
 	//booleanas de movimento
@@ -207,19 +248,18 @@ int main(int argc, char* args[])
 	bool dir = false;
 	bool cima = false;
 	bool baixo = false;
-	
+
 	//contadores de frames
 	int frameAtual = 0;
 	int frameDetetive = 0;
 	int qtdFrame = 3;
-	
 
 	//função booleana de execução do loop e criação da variavel atribuida a eventos
 	bool executando = true;
 	SDL_Event click;
 
 	//--Area de criação de retangulos :D --//
-	
+
 	SDL_Rect detetiveRect;
 	detetiveRect.x = 64;
 	detetiveRect.y = 96;
@@ -227,15 +267,30 @@ int main(int argc, char* args[])
 	detetiveRect.h = 64;
 
 	SDL_Rect textoRect;
-
 	textoRect.x = SCREEN_WIDTH / 2 - 200;
 	textoRect.y = SCREEN_HEIGHT / 2 - 100;
 	textoRect.w = 400;
 	textoRect.h = 200;
 
+	SDL_Rect cartaRect;
+	cartaRect.x = SCREEN_WIDTH / 2 - 200;
+	cartaRect.y = SCREEN_HEIGHT / 2 - 300;
+	cartaRect.w = 400;
+	cartaRect.h = 600;
+
+	SDL_Rect itensRect[5];
+	for (int i = 0, x = 425, d = 45; i < 5; i++)
+	{
+		itensRect[i].x = x;
+		itensRect[i].y = 670;
+		itensRect[i].w = 40;
+		itensRect[i].h = 40;
+
+		x += d;
+	}
+
 	//--fim da área de criação de retângulos--//
 
-	
 	init();
 
 	loadImage();
@@ -278,70 +333,110 @@ int main(int argc, char* args[])
 				}
 				else if (click.key.keysym.sym == SDLK_k)
 				{
-					if (chatBox == false)
-						chatBox = true;
-					else if (chatBox == true)
-						chatBox = false;
-
 					if (cenario[8][0] == 2 && cenario[8][1] == 2)
 					{
-						if (chave1 == 0)
+						if (chave1 == 0 && detetiveLado == 3)
 						{
+							chatBox = true;
 							chave1 = 1;
 							printf("você adiquiriu a chave 1\n");
 						}
-					}
-
-					else if (cenario[18][12] == 2)
-					{
-						if (chave2 == 0)
+						else
 						{
-							chave2 = 1;
-							printf("você encontrou a chave 2 em baixo da cama!\n");
+							chatBox = false;
 						}
 					}
 
-					else if (cenario[13][28] == 2)
+					else if (cenario[18][12] == 2 && detetiveLado == 3)
 					{
-						if (chave2 == 1 && chave3 == 0)
+						if (chave2 == 0)
 						{
-							chave3 = 1;
-							chave2 = 3; 
-							printf("você adiquiriu a chave 3\n");
-						}	
+							chatBox = true;
+							chave2 = 1;
+							printf("você encontrou a chave 2 em baixo da cama!\n");
+						}
+						else
+						{
+							chatBox = false;
+						}
 					}
 
-					else if (cenario[5][8] == 2)
+					else if (cenario[12][30] == 2)
+					{
+						if (chave2 == 1 && chave3 == 0 && detetiveLado == 2)
+						{
+							chatBox = true;
+							chave3 = 1;
+							chave2 = 3;
+							printf("você adiquiriu a chave 3\n");
+						}
+						else
+						{
+							chatBox = false;
+						}
+					}
+
+					else if (cenario[5][12] == 2 && detetiveLado == 3)
 					{
 						if (chave3 == 1 && chave4 == 0)
 						{
+							chatBox = true;
 							chave4 = 1;
 							chave3 = 3;
 							printf("você adiquiriu a chave 4\n");
 						}
-					}
-					
-					else if (cenario[4][25] == 2 && cenario[4][26] == 2)
-					{
-						bau = 1;
-						printf("você adiquiriu um baú com 2 fechaduras!\n");
+						else
+						{
+							chatBox = false;
+						}
 					}
 
-					else if (cenario[7][13] == 2 && cenario[7][14] == 2 && chave1 == 1 && chave4 == 1 && bau == 1)
+					else if (cenario[4][25] == 2 && cenario[4][26] == 2 && detetiveLado == 3)
 					{
-						cartaDeAmor = 1;
-						chave1 = 3;
-						chave4 = 3;
-						bau = 3;
-						printf("Você abriu o bau e encontrou uma carta, aperte k para ler!");
+						if (bau == 0)
+						{
+							chatBox = true;
+							bau = 1;
+							printf("você adiquiriu um baú com 4 fechaduras!"
+								" Se possuir as 4 chaves e estiver no local"
+								" correto você poderá abri-lo\n");
+						}
+						else
+						{
+							chatBox = false;
+						}
 					}
 
-					else if (chave1 == 1 && chave4 == 1 && bau == 1)
+					else if ((cenario[7][13] == 2 && cenario[7][14] == 2) && detetiveLado == 3)
 					{
-						printf("Você achou o baú e as chaves para abri-lo, vá ao local correto para abrir o baú!!!\n");
+						if (chave1 == 1 && chave4 == 1 && bau == 1)
+						{
+							chatBox = true;
+							cartaDeAmor = 1;
+							chave1 = 3;
+							chave4 = 3;
+							bau = 3;
+							printf("Você abriu o bau e encontrou uma carta, aperte k para ler!");
+						}
+						else
+						{
+							chatBox = false;
+							cartaDeAmor++;
+						}
 					}
-					
-					if (cenario[3][3] == 2)
+					if (cartaDeAmor == 2)
+					{
+						if (chatBox == false)
+						{
+							chatBox = true;
+							cartaLida = true;
+							printf("Dear ...");
+						}
+						else if (chatBox == true)
+							chatBox = false;
+					}
+
+					if (cenario[3][3] == 2 && detetiveLado == 3)
 					{
 						executando = false;
 					}
@@ -350,24 +445,34 @@ int main(int argc, char* args[])
 			else if (click.type == SDL_KEYUP)
 				if (click.key.keysym.sym == SDLK_a)
 				{
+					detetiveLado = 1;
 					esq = false;
 				}
 				else if (click.key.keysym.sym == SDLK_d)
 				{
+					detetiveLado = 2;
 					dir = false;
 				}
 				else if (click.key.keysym.sym == SDLK_w)
 				{
+					detetiveLado = 3;
 					cima = false;
 				}
 				else if (click.key.keysym.sym == SDLK_s)
 				{
+					detetiveLado = 4;
 					baixo = false;
 				}
 		}
 
 		//---------------lógica----------------------//
 		//------------------------------------------//
+
+		if (chatBox == true && (cenario[8][1] != 2 && cenario[18][12] != 2 && cenario[12][30] != 2 && cenario[5][12] != 2
+			&& cenario[4][25] != 2 && cenario[7][13] != 2))
+		{
+			chatBox = false;
+		}
 
 		//---DETETIVE---//
 
@@ -393,7 +498,7 @@ int main(int argc, char* args[])
 				}
 			}
 			for (int i = 0; i < 22; i++) {
-				for (int j = 0; j < 30; j++) {
+				for (int j = 0; j < 34; j++) {
 					printf("%i", cenario[i][j]);
 				}
 				printf("\n");
@@ -421,7 +526,7 @@ int main(int argc, char* args[])
 				}
 			}
 			for (int i = 0; i < 22; i++) {
-				for (int j = 0; j < 30; j++) {
+				for (int j = 0; j < 34; j++) {
 					printf("%i", cenario[i][j]);
 				}
 				printf("\n");
@@ -449,12 +554,11 @@ int main(int argc, char* args[])
 				}
 			}
 			for (int i = 0; i < 22; i++) {
-				for (int j = 0; j < 30; j++) {
+				for (int j = 0; j < 34; j++) {
 					printf("%i", cenario[i][j]);
 				}
 				printf("\n");
 			}
-
 			printf("\n");
 		}
 		else if (baixo == true)
@@ -478,12 +582,11 @@ int main(int argc, char* args[])
 				}
 			}
 			for (int i = 0; i < 22; i++) {
-				for (int j = 0; j < 30; j++) {
+				for (int j = 0; j < 34; j++) {
 					printf("%i", cenario[i][j]);
 				}
 				printf("\n");
 			}
-
 			printf("\n");
 		}
 
@@ -506,7 +609,7 @@ int main(int argc, char* args[])
 		{
 			detetiveRect.y = SCREEN_HEIGHT - detetiveRect.h;
 		}
-		
+
 		//--------renderização---------//
 		//----------------------------//
 
@@ -516,29 +619,22 @@ int main(int argc, char* args[])
 		//renderiza a textura na tela
 		SDL_RenderCopy(gRenderer, gTexture, NULL, NULL);
 
-		if (chatBox == true) {
-			if (chave1 == 1 || chave2 == 1 || chave3 == 1 || chave4 == 1)
-			{
-				SDL_RenderCopy(gRenderer, texto, NULL, &textoRect);
-			}
-				
-
-		}
-		
-
 		if (esq)
 		{
 			switch (frameDetetive)
 			{
-				case 0:
-					SDL_RenderCopy(gRenderer, detetive2, NULL, &detetiveRect);
-					break;
-				case 1:
-					SDL_RenderCopy(gRenderer, detetive3, NULL, &detetiveRect);
-					break;
-				case 2:
-					SDL_RenderCopy(gRenderer, detetive4, NULL, &detetiveRect);
-					break;
+			case 0:
+				SDL_RenderCopy(gRenderer, detetive2, NULL, &detetiveRect);
+				break;
+			case 1:
+				SDL_RenderCopy(gRenderer, detetive3, NULL, &detetiveRect);
+				break;
+			case 2:
+				SDL_RenderCopy(gRenderer, detetive4, NULL, &detetiveRect);
+				break;
+			case 3:
+				SDL_RenderCopy(gRenderer, detetive3, NULL, &detetiveRect);
+				break;
 			}
 		}
 		else if (dir)
@@ -554,24 +650,114 @@ int main(int argc, char* args[])
 			case 2:
 				SDL_RenderCopy(gRenderer, detetive7, NULL, &detetiveRect);
 				break;
+			case 3:
+				SDL_RenderCopy(gRenderer, detetive6, NULL, &detetiveRect);
+				break;
+			}
+		}
+		else if (cima)
+		{
+			switch (frameDetetive)
+			{
+			case 0:
+				SDL_RenderCopy(gRenderer, detetive9, NULL, &detetiveRect);
+				break;
+			case 1:
+				SDL_RenderCopy(gRenderer, detetive8, NULL, &detetiveRect);
+				break;
+			case 2:
+				SDL_RenderCopy(gRenderer, detetive10, NULL, &detetiveRect);
+				break;
+			case 3:
+				SDL_RenderCopy(gRenderer, detetive8, NULL, &detetiveRect);
+				break;
+			}
+		}
+		else if (baixo)
+		{
+			switch (frameDetetive)
+			{
+			case 0:
+				SDL_RenderCopy(gRenderer, detetive11, NULL, &detetiveRect);
+				break;
+			case 1:
+				SDL_RenderCopy(gRenderer, detetive12, NULL, &detetiveRect);
+				break;
+			case 2:
+				SDL_RenderCopy(gRenderer, detetive11, NULL, &detetiveRect);
+				break;
+			case 3:
+				SDL_RenderCopy(gRenderer, detetive13, NULL, &detetiveRect);
+				break;
 			}
 		}
 		else
 		{
-			SDL_RenderCopy(gRenderer, detetive1, NULL, &detetiveRect);
+			if (detetiveLado == 4)
+				SDL_RenderCopy(gRenderer, detetive11, NULL, &detetiveRect);
+			if (detetiveLado == 3)
+				SDL_RenderCopy(gRenderer, detetive8, NULL, &detetiveRect);
+			if (detetiveLado == 2)
+				SDL_RenderCopy(gRenderer, detetive6, NULL, &detetiveRect);
+			if (detetiveLado == 1)
+				SDL_RenderCopy(gRenderer, detetive3, NULL, &detetiveRect);
 		}
-		
+
+		if (chatBox == true)
+		{
+			if (cenario[8][0] == 2 && cenario[8][1] == 2)
+				SDL_RenderCopy(gRenderer, pista1, NULL, &textoRect);
+			else if (cenario[18][12] == 2)
+				SDL_RenderCopy(gRenderer, pista2, NULL, &textoRect);
+			else if (cenario[12][30] == 2)
+				SDL_RenderCopy(gRenderer, pista3, NULL, &textoRect);
+			else if (cenario[5][12] == 2)
+				SDL_RenderCopy(gRenderer, pista4, NULL, &textoRect);
+			else if (cenario[4][25] == 2 && cenario[4][26] == 2)
+				SDL_RenderCopy(gRenderer, caixa, NULL, &textoRect);
+			else if (cenario[7][13] == 2 && cenario[7][14] == 2 && chave1 == 3 && chave4 == 3 && bau == 3)
+				SDL_RenderCopy(gRenderer, bauAberto, NULL, &textoRect);
+			if ((cenario[7][13] == 2 && cenario[7][14] == 2) && cartaDeAmor == 2 && cartaLida == true)
+			{
+				SDL_RenderCopy(gRenderer, carta, NULL, &cartaRect);
+			}
+		}
+
+		for (int i = 0; i < 5; i++)
+		{
+			switch (i)
+			{
+			case 0:
+				if (chave1 != 0)
+					SDL_RenderCopy(gRenderer, miniChave1, NULL, &itensRect[i]);
+				break;
+			case 1:
+				if (chave2 != 0)
+					SDL_RenderCopy(gRenderer, miniChave2, NULL, &itensRect[i]);
+				break;
+			case 2:
+				if (chave3 != 0)
+					SDL_RenderCopy(gRenderer, miniChave3, NULL, &itensRect[i]);
+				break;
+			case 3:
+				if (chave4 != 0)
+					SDL_RenderCopy(gRenderer, miniChave4, NULL, &itensRect[i]);
+				break;
+			case 4:
+				if (bau != 0)
+					SDL_RenderCopy(gRenderer, miniBau, NULL, &itensRect[i]);
+				break;
+			}
+		}
 		//atualiza a renderização
 		SDL_RenderPresent(gRenderer);
 
 		frameDetetive++;
-		if (frameDetetive == 3)
+		if (frameDetetive == 4)
 			frameDetetive = 0;
-
 
 		SDL_Delay(50);
 	}
-
 	fechar();
 
 	return 0;
